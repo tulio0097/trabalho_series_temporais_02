@@ -1,0 +1,77 @@
+---
+title: "Análise _ Séries Temporais"
+author: "Túlio"
+format: html
+editor: visual
+---
+
+```{r}
+#| include: false
+library(dplyr)
+library(nasapower) # dados do satélite via API da NASA
+library(fpp3) # as_tsible
+library(rugarch)
+library(quantmod)
+library(tidyquant)
+library(ggplot2)
+```
+
+## Tema
+
+Os dados são referente a região do Cariri Oriental de Paríba, que é composta por 12 municipios, porém nossa análise irá se limitar apenas ao municipios de Queimadas-PB.
+
+O objetivo central é compareender a existencia de alguma correlação entre as variáveis e tentar, a paritr dos dados, compreender melhor o comportamento climatico deste local.
+
+Neste estudo serão análisadas as variáveis:
+
+-   Temperatura Média - 2m (ºC)
+
+-   Precipitação Total Corrigida - (mm/dia)
+
+-   Velocidade do vento - 2m (m/s)
+
+-   Umidade Relativa (%)
+
+## Gráfico das Séries 
+
+Estamos análisando as variáveis
+
+```{r}
+#| echo: false
+### Plot das Séries juntas
+source("plot_series")
+
+```
+
+Observações:
+
+De foram geral, as variáveis apresentam uma grande variabilidade. Isso nos leva a supor que a familida de modelos adequados para esta situação são os modelos GARCH.\
+De maneira análoga, será feito o teste de hipotese para que seja possível concluir a presença (ou ausencia) do efeito GARCH nas séries.
+
+## Testando Efeito GARCH
+
+```{r}
+#| echo: false
+# Testar se existe efeito ARCH e GARCH
+FinTS::ArchTest(df_final$Temperatura_Media, lags = 12)
+FinTS::ArchTest(df_final$Precipitacao_Total, lags = 12)
+FinTS::ArchTest(df_final$Velocidade_Vento, lags = 12)
+FinTS::ArchTest(df_final$Umidade_Relativa, lags = 12)
+```
+
+Observação: \
+Todas as variáveis apresentaram a presença do efeito GACH, logo, temos o nosso primeiro principal candidato para modelas nossas séries.
+
+Antes de partir para a fase de modelagem, vamos verificar se alguma das séries tem Sazonalidade e Tendência.
+
+## Estudo da Sazonalidade
+
+```{r}
+#| echo: false
+gridExtra::grid.arrange(
+  sazonalidade_Precipitacao, sazonalidade_Temperatura, 
+  sazonalidade_Velocidade, sazonalidade_Umiade,
+  layout_matrix = rbind(c(1,2),
+                        c(3,4))
+)
+```

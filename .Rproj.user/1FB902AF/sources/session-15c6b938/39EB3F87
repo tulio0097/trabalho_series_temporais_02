@@ -1,0 +1,33 @@
+{
+    "id": "39EB3F87",
+    "path": "C:/Users/hercu/Documents/trabalho_series_temporais_02/teste_01.Rmd",
+    "project_path": "teste_01.Rmd",
+    "type": "r_markdown",
+    "hash": "3282387411",
+    "contents": "",
+    "dirty": false,
+    "created": 1774658842067.0,
+    "source_on_save": false,
+    "relative_order": 3,
+    "properties": {
+        "tempName": "Untitled1",
+        "chunk_output_type": "inline",
+        "source_window_id": "",
+        "Source": "Source",
+        "cursorPosition": "59,0",
+        "scrollLine": "0",
+        "rmdVisualMode": "true",
+        "rmdVisualWrapConfigured": "true",
+        "docOutlineVisible": "1",
+        "rmdVisualCollapsedChunks": "52,826,1810",
+        "rmdVisualModeLocation": "2585:2255"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1774663815,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1774663815761,
+    "read_only": false,
+    "read_only_alternatives": []
+}

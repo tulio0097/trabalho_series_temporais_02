@@ -1,0 +1,5 @@
+"0","#| echo: false"
+"0","#| label: carregar-scripts"
+"0","### Plot das Séries juntas"
+"0","print(plot_series)"
+"0",""

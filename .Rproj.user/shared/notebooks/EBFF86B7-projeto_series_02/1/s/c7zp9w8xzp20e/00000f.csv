@@ -1,0 +1,6 @@
+"0","gridExtra::grid.arrange("
+"0","  sazonalidade_Precipitacao, sazonalidade_Temperatura, "
+"0","  sazonalidade_Velocidade, sazonalidade_Umiade,"
+"0","  layout_matrix = rbind(c(1,2),"
+"0","                        c(3,4))"
+"0",")"
