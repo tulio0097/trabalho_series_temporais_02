@@ -1,0 +1,8 @@
+"0","#| include: false"
+"0","library(dplyr)"
+"0","library(nasapower) # dados do satélite via API da NASA"
+"0","library(fpp3) # as_tsible"
+"0","library(rugarch)"
+"0","library(quantmod)"
+"0","library(tidyquant)"
+"0","library(ggplot2)"

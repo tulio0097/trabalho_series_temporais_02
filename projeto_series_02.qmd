@@ -32,21 +32,20 @@ Neste estudo serão análisadas as variáveis:
 
 -   Umidade Relativa (%)
 
-## Gráfico das Séries 
+## Gráfico das Séries
 
 Estamos análisando as variáveis
 
 ```{r}
 #| echo: false
 ### Plot das Séries juntas
-source("plot_series")
+plot_series
 
 ```
 
 Observações:
 
-De foram geral, as variáveis apresentam uma grande variabilidade. Isso nos leva a supor que a familida de modelos adequados para esta situação são os modelos GARCH.\
-De maneira análoga, será feito o teste de hipotese para que seja possível concluir a presença (ou ausencia) do efeito GARCH nas séries.
+De foram geral, as variáveis apresentam uma grande variabilidade. Isso nos leva a supor que a familida de modelos adequados para esta situação são os modelos GARCH. De maneira análoga, será feito o teste de hipotese para que seja possível concluir a presença (ou ausencia) do efeito GARCH nas séries.
 
 ## Testando Efeito GARCH
 
@@ -59,7 +58,7 @@ FinTS::ArchTest(df_final$Velocidade_Vento, lags = 12)
 FinTS::ArchTest(df_final$Umidade_Relativa, lags = 12)
 ```
 
-Observação: \
+Observação:\
 Todas as variáveis apresentaram a presença do efeito GACH, logo, temos o nosso primeiro principal candidato para modelas nossas séries.
 
 Antes de partir para a fase de modelagem, vamos verificar se alguma das séries tem Sazonalidade e Tendência.

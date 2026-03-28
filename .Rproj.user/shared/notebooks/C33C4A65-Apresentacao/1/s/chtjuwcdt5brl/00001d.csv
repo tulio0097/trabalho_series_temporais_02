@@ -1,3 +1,5 @@
+"0","#| echo: false"
+"0","# Criei o objeto para evitar colocar todo o codigo do gráfico, mas não deu certo não reconhece o objeto aqui no .rmd"
 "0","gridExtra::grid.arrange("
 "0","  sazonalidade_Precipitacao, sazonalidade_Temperatura, "
 "0","  sazonalidade_Velocidade, sazonalidade_Umiade,"

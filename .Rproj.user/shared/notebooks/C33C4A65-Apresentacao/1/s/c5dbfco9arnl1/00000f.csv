@@ -1,3 +1,4 @@
+"0","#| echo: false"
 "0","# Testar se existe efeito ARCH e GARCH"
 "0","FinTS::ArchTest(df_final$Temperatura_Media, lags = 12)"
 "1","
