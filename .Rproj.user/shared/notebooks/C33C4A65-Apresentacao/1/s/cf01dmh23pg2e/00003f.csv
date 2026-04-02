@@ -1,0 +1,6 @@
+"0","# gerei os graficos mas não consegui chamar aqui no .rmd"
+"0","# ainda não identifiquei o erro"
+"0","ACF_PACF_Temperatura1 <- gridExtra::grid.arrange("
+"0","  plot_serie_01, acf1, pacf1,"
+"0","  layout_matrix = rbind(c(1,1),c(2,3))"
+"0",")"

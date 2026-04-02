@@ -8,6 +8,8 @@ library(fpp3) # as_tsible
 library(rugarch)
 library(quantmod)
 library(tidyquant)
+library(lubridate)
+library(tsibble)
 
 # Estrutura de dados dos municípios (Coordenadas em Graus Decimais)
 municipios_cariri <- data.frame(
@@ -23,7 +25,7 @@ coletar_dados <- function(nome, lat, lon) {
   df <- get_power(
     community = "ag",  # "ag" é comum para climatologia/agricultura
     lonlat = c(lon, lat),
-    pars = c("T2M", "PRECTOTCORR", ),
+    pars = c("T2M", "PRECTOTCORR", "WS2M", "RH2M"),
     dates = c("1981-01-01", "2021-01-01"),
     temporal_api = "daily"
   )
@@ -31,7 +33,7 @@ coletar_dados <- function(nome, lat, lon) {
   return(df)
 }
 
-# Executar para todos (isso pode levar alguns minutos devido à API)
+# Executar para todos (usando a API)
 lista_resultados <- mapply(coletar_dados, 
                            municipios_cariri$nome, 
                            municipios_cariri$lat, 
@@ -42,79 +44,63 @@ lista_resultados <- mapply(coletar_dados,
 df_final <- bind_rows(lista_resultados)
 
 df_final <- df_final %>% 
-  select(YYYYMMDD,T2M,PRECTOTCORR,municipio)
+  select(YYYYMMDD,T2M,PRECTOTCORR,municipio,WS2M,RH2M) %>% 
+  rename(
+    Data = YYYYMMDD,
+    Temperatura_Media = T2M,
+    Precipitacao_Total = PRECTOTCORR,
+    Velocidade_Vento = WS2M,
+    Umidade_Relativa = RH2M
+  )
 # Visualizar resultado
 unique(df_final$municipio)
 summary(df_final)
 
-# 
-df_02 <- df_final %>% 
-  mutate(
-    Data = YYYYMMDD) %>% 
+## Transformando em formato longo (tsibble)
+df_ts <- df_final%>% 
   as_tsibble(index = Data, key = municipio)
 
 
-plot_serie <- df_02 %>% 
-  autoplot(T2M)+
+plot_serie <- df_ts %>% 
+  autoplot(Temperatura_Media)+
   labs(title = "Temperatura Média - 2 metros")
 
 
-# ACF e PACF da série 
-acf <- df_02 %>%
-  ACF(Temperatura_M, lag_max = 20) %>% 
-  autoplot() +
-  labs(title = "ACF")
 
-pacf <- df_02 %>%
-  PACF(Temperatura_M, lag_max = 20) %>% 
-  autoplot() +
-  labs(title = "PACF")
+###########
+# Transformando a série em mensal 
+dados_mensais <- df_final %>%
+  select(Data,Temperatura_Media,Precipitacao_Total,municipio,Velocidade_Vento,Umidade_Relativa) %>% 
+  group_by(municipio,Data = floor_date(Data,"month")) %>% 
+  summarise(Temperatura_Media = mean(Temperatura_Media,na.rm = TRUE),
+            Chuva_total_mes = mean(Precipitacao_Total,na.rm = TRUE),
+            Vento_medio = mean(Velocidade_Vento,na.rm = TRUE),
+            Umidade_media = sum(Umidade_Relativa,na.rm = TRUE))
 
-gridExtra::grid.arrange(
-  plot_serie, acf, pacf,
-  layout_matrix = rbind(c(1,1),c(2,3))
-)
+dados_ts <- dados_mensais %>%
+  mutate(Data = yearmonth(Data)) %>% 
+  as_tsibble(index = Data, key = municipio)
+###########
 
-#################################################################################
+# Agrupando os dados por Trimestre e Município
+dados_trimestrais <- df_final %>%
+  group_by(municipio, Data = floor_date(Data, "quarter")) %>% 
+  summarise(
+    Temperatura_Media = mean(Temperatura_Media, na.rm = TRUE),
+    Chuva_total_trimestre = sum(Precipitacao_Total, na.rm = TRUE),
+    Vento_medio = mean(Velocidade_Vento, na.rm = TRUE),
+    Umidade_media = mean(Umidade_Relativa, na.rm = TRUE),
+    .groups = "drop"
+  )
 
-# Testar se existe efeito ARCH e GARCH
-FinTS::ArchTest(df_02$T2M, lags = 12)
-FinTS::ArchTest(df_02$PRECTOTCORR, lags = 12)
-
-# Há presença do efeito GARCH nesta série!
-
+# Convertendo para tsibble (formato de trimestre)
+dados_trimestrais_ts <- dados_trimestrais %>%
+  mutate(Data = yearquarter(Data)) %>% 
+  as_tsibble(index = Data, key = municipio)
 #################################################################################
 # Estudo da Sazonalidade de um unico municipio
 
 # Análise apenas para a cidade de Queimadas-PB
-ss_01 <- df_final %>%
-  filter(municipio == "Queimadas") %>% 
-  mutate(Data = YYYYMMDD) %>%
-  as_tsibble(index = Data)
+ss_01 <- df_ts %>%
+  filter(municipio == "Queimadas") 
 
-#### Comportamento da serie T2M
-plot_serie_T2M = ss_01 %>%
-  autoplot(T2M) +
-  labs(title="Temperatura média a 2m (°C)",
-       y="")
-plot_serie_T2M
-
-plot_serie_PREC = ss_01 %>%
-  autoplot(PRECTOTCORR) +
-  labs(title="Precipitação Total Corrigida (mm/dia)",
-       y="")
-plot_serie_PREC
-
-
-### Plot das duas Séries juntas
-ss_01 %>%
-  pivot_longer(-c(YYYYMMDD,Data,municipio)) %>%
-  ggplot(aes(x = Data, y = value, colour = name)) +
-  geom_line() +
-  facet_grid(name ~ ., scales = "free_y")
-
-### Estudo da Sazonalidade
-ss_01 %>%
-  gg_season(T2M, labels = "both") +
-  labs(y = "Temperatura média a 2m (°C)",
-       title = "Sazonalidade: T2M")
